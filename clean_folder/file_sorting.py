@@ -59,38 +59,42 @@ def _unpack_archive(FOLDER):
 
 #Основна функція сортування
 def _sort_by_type():
-    FOLDER = sys.argv[1]
-    if os.path.exists(FOLDER):
-        try:
-            _normalize_items(FOLDER)
-        except PermissionError:
-            print(f"Закрийте головну папку - {FOLDER} для корректної роботи скрипта!!")
-            pass
-        else:
-            for root, dirs, files in os.walk(FOLDER):
-                dirs[:] = [dir for dir in dirs if dir not in SKIPDIRS]
-                for file in files:
-                    file_ext = os.path.splitext(file)[-1]
-                    path = next((folder_name for folder_name, extention in CATEGORIES.items() if file_ext in extention), None)#Отримуєм ім'я папки зі словника з розширеннями файлів, відповідно до розширення
-                    ext = next((extention for folder_name, extention in CATEGORIES.items() if file_ext in extention), None)#Отримуєм можливі розширення файлів зі словника з розширеннями файлів
-                    if ext is not None and file_ext in ext:
-                        print(f'Файл {file}, було переміщено у {os.path.join(FOLDER, path)}\n')# Вивід повідомлень(logs) на екран 
-                        RESULT.append(file)
-                    if path:
-                        if not os.path.exists(FOLDER+'/'+path):
-                            os.mkdir(FOLDER +'/'+path)
-                            shutil.move(os.path.join(root, file), FOLDER+'/'+path)
-                        else:
-                            shutil.move(os.path.join(root, file), FOLDER+'/'+path)
-            _unpack_archive(FOLDER)
-            if RESULT == []:
-                print(f"Не було знайдено жодного підходящого файлу для сортування!\nПерелік НЕВІДОМИХ програмі розширень файлів: {unknown_types}")
-            else:
-                print(f"Перелік ВІДОМИХ програмі розширень файлів: {known_types}\nПерелік НЕВІДОМИХ програмі розширень файлів: {unknown_types.difference(known_types)}\n")
-            _del_empty_folder(FOLDER)
+    try:
+        FOLDER = sys.argv[1] 
+    except IndexError:
+        print('Вкажіть шлях до папки..!')
+        pass
     else:
-        print(f'Теки {sys.argv[1]} на вашому пристрої не існує. Вкажіть правильний шлях до теки!')
-
+        if os.path.exists(FOLDER):
+            try:
+                _normalize_items(FOLDER)
+            except PermissionError:
+                print(f"Закрийте головну папку - {FOLDER} для корректної роботи скрипта!!")
+                pass
+            else:
+                for root, dirs, files in os.walk(FOLDER):
+                    dirs[:] = [dir for dir in dirs if dir not in SKIPDIRS]
+                    for file in files:
+                        file_ext = os.path.splitext(file)[-1]
+                        path = next((folder_name for folder_name, extention in CATEGORIES.items() if file_ext in extention), None)#Отримуєм ім'я папки зі словника з розширеннями файлів, відповідно до розширення
+                        ext = next((extention for folder_name, extention in CATEGORIES.items() if file_ext in extention), None)#Отримуєм можливі розширення файлів зі словника з розширеннями файлів
+                        if ext is not None and file_ext in ext:
+                            print(f'Файл {file}, було переміщено у {os.path.join(FOLDER, path)}\n')# Вивід повідомлень(logs) на екран 
+                            RESULT.append(file)
+                        if path:
+                            if not os.path.exists(FOLDER+'/'+path):
+                                os.mkdir(FOLDER +'/'+path)
+                                shutil.move(os.path.join(root, file), FOLDER+'/'+path)
+                            else:
+                                shutil.move(os.path.join(root, file), FOLDER+'/'+path)
+                _unpack_archive(FOLDER)
+                if RESULT == []:
+                    print(f"Не було знайдено жодного підходящого файлу для сортування!\nПерелік НЕВІДОМИХ програмі розширень файлів: {unknown_types}")
+                else:
+                    print(f"Перелік ВІДОМИХ програмі розширень файлів: {known_types}\nПерелік НЕВІДОМИХ програмі розширень файлів: {unknown_types.difference(known_types)}\n")
+                _del_empty_folder(FOLDER)
+        else:
+            print(f'Теки {sys.argv[1]} на вашому пристрої не існує. Вкажіть правильний шлях до теки!')
 
 
 if __name__ == "__main__":
